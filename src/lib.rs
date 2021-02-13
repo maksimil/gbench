@@ -3,37 +3,33 @@ use std::io::Write;
 use std::mem::{self, MaybeUninit};
 use std::sync::Mutex;
 use std::thread::{self, JoinHandle};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 #[derive(Debug)]
 pub enum BenchMessage {
     Close,
-    Write(String),
+    Log { log: String, ts: u128 },
 }
 
 static mut EVENT_QUEUE: MaybeUninit<Mutex<Vec<BenchMessage>>> = MaybeUninit::uninit();
 static mut EVENT_JOIN_HANDLE: Option<JoinHandle<()>> = None;
+static mut GBENCH_START: MaybeUninit<Instant> = MaybeUninit::uninit();
 
-pub fn send(msg: BenchMessage) {
-    unsafe {
-        let mut queue_lock = (&*EVENT_QUEUE.as_ptr()).lock().unwrap();
-        queue_lock.push(msg);
-
-        println!("{:?}", &*queue_lock);
-    }
+pub fn timestamp() -> u128 {
+    unsafe { (&*GBENCH_START.as_ptr()).elapsed().as_millis() }
 }
 
 pub fn begin_gbench(filename: &'static str, period: Duration) {
     unsafe {
-        println!("Initializing");
+        GBENCH_START = MaybeUninit::new(Instant::now());
         EVENT_QUEUE = MaybeUninit::new(Mutex::new(Vec::new()));
 
-        println!("Initializing EVENT_JOIN_HANDLE");
         EVENT_JOIN_HANDLE = Some(thread::spawn(move || {
             // open file
-            println!("Opening fiile");
             let mut file = File::create(filename).unwrap();
+
             // write header
+            write!(file, "{{\"otherData\":{{}},\"traceEvents\":[{{\"cat\":\"log\",\"name\":\"start\",\"ph\":\"I\",\"pid\":0,\"tid\":0,\"ts\":{}}}", timestamp()).unwrap();
 
             // write messages
             'event_loop: loop {
@@ -50,9 +46,8 @@ pub fn begin_gbench(filename: &'static str, period: Duration) {
                             closed = true;
                         }
 
-                        BenchMessage::Write(msg) => {
-                            println!("{}", msg);
-                            write!(file, "{}", msg).unwrap();
+                        BenchMessage::Log { log, ts } => {
+                            write!(file, ",{{\"cat\":\"log\",\"name\":\"{}\",\"ph\":\"I\",\"pid\":0,\"tid\":0,\"ts\":{}}}", log, ts).unwrap();
                         }
                     }
                 }
@@ -63,10 +58,10 @@ pub fn begin_gbench(filename: &'static str, period: Duration) {
 
                 thread::sleep(period);
             }
-            // write footer
-        }));
 
-        println!("Initialized {:?}", EVENT_JOIN_HANDLE);
+            // write footer
+            write!(file, "]}}").unwrap();
+        }));
     }
 }
 
@@ -79,6 +74,20 @@ pub fn end_gbench() {
         join_handle.join().unwrap();
         let _queue = mem::replace(&mut EVENT_QUEUE, MaybeUninit::uninit()).assume_init();
     }
+}
+
+pub(crate) fn send(msg: BenchMessage) {
+    unsafe {
+        let mut queue_lock = (&*EVENT_QUEUE.as_ptr()).lock().unwrap();
+        queue_lock.push(msg);
+    }
+}
+
+pub fn log(log: String) {
+    send(BenchMessage::Log {
+        log,
+        ts: timestamp(),
+    });
 }
 
 #[cfg(test)]
