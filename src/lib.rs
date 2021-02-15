@@ -9,6 +9,7 @@ use std::time::{Duration, Instant};
 pub enum BenchMessage {
     Close,
     Log { log: String, ts: u128 },
+    Bench { name: String, ts: u128, dur: u128 },
 }
 
 static mut EVENT_QUEUE: MaybeUninit<Mutex<Vec<BenchMessage>>> = MaybeUninit::uninit();
@@ -16,7 +17,15 @@ static mut EVENT_JOIN_HANDLE: Option<JoinHandle<()>> = None;
 static mut GBENCH_START: MaybeUninit<Instant> = MaybeUninit::uninit();
 
 pub fn timestamp() -> u128 {
-    unsafe { (&*GBENCH_START.as_ptr()).elapsed().as_millis() }
+    unsafe { (&*GBENCH_START.as_ptr()).elapsed().as_micros() }
+}
+
+pub fn ts_of(instant: &Instant) -> u128 {
+    unsafe {
+        instant
+            .duration_since(*GBENCH_START.as_ptr().clone())
+            .as_micros()
+    }
 }
 
 pub fn begin_gbench(filename: &'static str, period: Duration) {
@@ -48,6 +57,10 @@ pub fn begin_gbench(filename: &'static str, period: Duration) {
 
                         BenchMessage::Log { log, ts } => {
                             write!(file, ",{{\"cat\":\"log\",\"name\":\"{}\",\"ph\":\"I\",\"pid\":0,\"tid\":0,\"ts\":{}}}", log, ts).unwrap();
+                        }
+
+                        BenchMessage::Bench { name, ts, dur } => {
+                            write!(file,",{{\"cat\":\"function\",\"dur\":{},\"name\":\"{}\",\"ph\":\"X\",\"pid\":0,\"tid\":0,\"ts\":\"{}\"}}", dur, name, ts).unwrap();
                         }
                     }
                 }
@@ -88,6 +101,14 @@ pub fn log(log: String) {
         log,
         ts: timestamp(),
     });
+}
+
+pub fn bench(name: String, start: &Instant) {
+    send(BenchMessage::Bench {
+        name,
+        ts: ts_of(start),
+        dur: timestamp() - ts_of(start),
+    })
 }
 
 #[cfg(test)]
