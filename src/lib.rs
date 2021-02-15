@@ -110,6 +110,3 @@ pub fn bench(name: String, start: &Instant) {
         dur: timestamp() - ts_of(start),
     })
 }
-
-#[cfg(test)]
-pub mod test;
