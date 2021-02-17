@@ -18,9 +18,10 @@ struct GlobalData {
 
 // message that will be sent to the event loop
 #[derive(Debug)]
-pub(crate) enum BenchMessage {
+pub enum BenchMessage {
     Close,
     Log { log: String, ts: u128 },
+    Bench { name: String, ts: u128, dur: u128 },
 }
 
 // preiod of event loop update
@@ -65,6 +66,10 @@ pub fn instantiate() {
                         BenchMessage::Log { log, ts } => {
                             write!(file, ",{{\"cat\":\"log\",\"name\":\"{}\",\"ph\":\"I\",\"pid\":0,\"tid\":0,\"ts\":{}}}", log, ts).unwrap();
                         }
+                        // write benchin data
+                        BenchMessage::Bench { name, ts, dur } => {
+                            write!(file,",{{\"cat\":\"function\",\"dur\":{},\"name\":\"{}\",\"ph\":\"X\",\"pid\":0,\"tid\":0,\"ts\":{}}}", dur, name, ts).unwrap();
+                        }
                     }
                 }
 
@@ -89,7 +94,7 @@ pub fn instantiate() {
 }
 
 // send BenchMessage to the event loop
-pub(crate) fn send(message: BenchMessage) {
+pub fn send(message: BenchMessage) {
     unsafe {
         println!("Locking");
         let lock = (&*GLOBAL_DATA.as_ptr()).sender.lock().unwrap();
@@ -99,7 +104,7 @@ pub(crate) fn send(message: BenchMessage) {
 }
 
 // time of program beginning
-pub(crate) fn begin_time() -> Instant {
+pub fn begin_time() -> Instant {
     unsafe { (&*GLOBAL_DATA.as_ptr()).program_begin }
 }
 
