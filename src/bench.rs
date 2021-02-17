@@ -1,7 +1,7 @@
 use std::io::Write;
 use std::time::Instant;
 
-use crate::{begin_time, file_mutex};
+use crate::{begin_time, deinstantiate, file_mutex, instantiate};
 
 fn ts_of(instant: Instant) -> u128 {
     instant.duration_since(begin_time()).as_micros()
@@ -46,5 +46,20 @@ impl TimeScope {
 impl Drop for TimeScope {
     fn drop(&mut self) {
         bench(&self.name, self.start);
+    }
+}
+
+pub struct Instantiator;
+
+impl Instantiator {
+    pub fn new(folder: &str) -> Instantiator {
+        instantiate(folder);
+        Instantiator
+    }
+}
+
+impl Drop for Instantiator {
+    fn drop(&mut self) {
+        deinstantiate();
     }
 }
