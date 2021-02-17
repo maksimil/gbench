@@ -56,13 +56,13 @@ pub fn file_mutex() -> MutexGuard<'static, File> {
 
 // deinstantiate the event loop
 pub fn deinstantiate() {
-    unsafe {
-        // write footer
+    // write footer
+    {
         let mut file = file_mutex();
         write!(file, "]}}").unwrap();
+    }
 
-        drop(file);
-
+    unsafe {
         // getting global data for dropping
         let _gd = mem::replace(&mut GLOBAL_DATA, MaybeUninit::uninit()).assume_init();
     }
