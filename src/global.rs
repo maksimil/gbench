@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::Write;
-use std::mem::{self};
+use std::mem;
 use std::sync::{Mutex, MutexGuard};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
@@ -14,28 +14,29 @@ struct GlobalData {
 }
 
 // method for event loop starting
-pub fn instantiate() {
+pub fn instantiate(folder: &str) {
+    // data initialization
+    let program_begin = Instant::now();
+
+    // file mutex
+    let file_mutex = Mutex::new({
+        let mut file = File::create(format!(
+            "{}/bench-{}.json",
+            folder,
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_millis()
+        ))
+        .unwrap();
+
+        write!(file, "{{\"otherData\":{{}},\"traceEvents\":[{{\"cat\":\"log\",\"name\":\"start\",\"ph\":\"I\",\"pid\":0,\"tid\":0,\"ts\":0}}").unwrap();
+
+        file
+    });
+
+    // writing data to global
     unsafe {
-        // data initialization
-        let program_begin = Instant::now();
-
-        // file mutex
-        let file_mutex = Mutex::new({
-            let mut file = File::create(format!(
-                "target/bench-{}.json",
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_millis()
-            ))
-            .unwrap();
-
-            write!(file, "{{\"otherData\":{{}},\"traceEvents\":[{{\"cat\":\"log\",\"name\":\"start\",\"ph\":\"I\",\"pid\":0,\"tid\":0,\"ts\":0}}").unwrap();
-
-            file
-        });
-
-        // writing data to global
         GLOBAL_DATA = MaybeUninit::new(GlobalData {
             file_mutex,
             program_begin,
