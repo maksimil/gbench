@@ -11,6 +11,7 @@ pub use bench::Instantiator;
 pub use bench::TimeScope;
 pub use bench::_log;
 
+#[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! scope {
     ($name:ident) => {
@@ -23,6 +24,15 @@ macro_rules! scope {
     };
 }
 
+#[cfg(not(debug_assertions))]
+#[macro_export]
+macro_rules! scope {
+    ($name:ident) => {};
+
+    ($name:ident|$($arg:tt)*) => {};
+}
+
+#[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! instantiate {
     ($folder:expr) => {
@@ -31,6 +41,13 @@ macro_rules! instantiate {
     };
 }
 
+#[cfg(not(debug_assertions))]
+#[macro_export]
+macro_rules! instantiate {
+    ($folder: expr) => {};
+}
+
+#[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => {
@@ -38,4 +55,10 @@ macro_rules! log {
         let log_string = format!($($arg)*);
         log(&log_string);
     };
+}
+
+#[cfg(not(debug_assertions))]
+#[macro_export]
+macro_rules! log {
+    ($($arg:tt)*) => {};
 }
