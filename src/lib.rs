@@ -13,9 +13,13 @@ pub use bench::TimeScope;
 
 #[macro_export]
 macro_rules! scope {
-    ($name: ident) => {
+    ($name:ident) => {
+        scope!($name | stringify!(name));
+    };
+
+    ($name:ident | $($arg:tt)*) => {
         use gbench::TimeScope;
-        let $name = TimeScope::new(stringify!($name));
+        let name = TimeScope::new(format!($($arg)*));
     };
 }
 
