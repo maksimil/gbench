@@ -1,13 +1,13 @@
 use std::io::Write;
 use std::time::Instant;
 
-use crate::{begin_time, deinstantiate, file_mutex, instantiate};
+use crate::{begin, begin_time, end, file_mutex};
 
 fn ts_of(instant: Instant) -> u128 {
     instant.duration_since(begin_time()).as_micros()
 }
 
-pub fn log(log: &str) {
+pub fn _log(log: &str) {
     let ts = ts_of(Instant::now());
 
     let mut file = file_mutex();
@@ -53,13 +53,13 @@ pub struct Instantiator;
 
 impl Instantiator {
     pub fn new(folder: &str) -> Instantiator {
-        instantiate(folder);
+        begin(folder);
         Instantiator
     }
 }
 
 impl Drop for Instantiator {
     fn drop(&mut self) {
-        deinstantiate();
+        end();
     }
 }

@@ -14,7 +14,7 @@ struct GlobalData {
 }
 
 // method for event loop starting
-pub fn instantiate(folder: &str) {
+pub fn begin(folder: &str) {
     // data initialization
     let program_begin = Instant::now();
 
@@ -55,7 +55,7 @@ pub fn file_mutex() -> MutexGuard<'static, File> {
 }
 
 // deinstantiate the event loop
-pub fn deinstantiate() {
+pub fn end() {
     // write footer
     {
         let mut file = file_mutex();
