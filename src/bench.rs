@@ -29,13 +29,13 @@ pub fn bench(name: &str, start: Instant) {
     ).unwrap();
 }
 
-pub struct TimeScope {
+pub struct TimeScope<S: AsRef<str>> {
     start: Instant,
-    name: String,
+    name: S,
 }
 
-impl TimeScope {
-    pub fn new(name: String) -> TimeScope {
+impl<S: AsRef<str>> TimeScope<S> {
+    pub fn new(name: S) -> TimeScope<S> {
         TimeScope {
             start: Instant::now(),
             name,
@@ -43,9 +43,9 @@ impl TimeScope {
     }
 }
 
-impl Drop for TimeScope {
+impl<S: AsRef<str>> Drop for TimeScope<S> {
     fn drop(&mut self) {
-        bench(&self.name, self.start);
+        bench(self.name.as_ref(), self.start);
     }
 }
 

@@ -15,7 +15,7 @@ pub use bench::TimeScope;
 #[macro_export]
 macro_rules! scope {
     ($name: ident) => {
-        let $name = TimeScope::new(String::from(stringify!($name)));
+        let $name = TimeScope::new(stringify!($name));
     };
 }
 
