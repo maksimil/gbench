@@ -37,8 +37,10 @@ macro_rules! scope {
     };
 
     ($name:ident | $($arg:tt)*) => {
-        use gbench::TimeScope;
-        let name = TimeScope::new(format!($($arg)*));
+        let $name = {
+            use gbench::TimeScope;
+            TimeScope::new(format!($($arg)*))
+        };
     };
 }
 
@@ -63,8 +65,10 @@ macro_rules! scope {
 #[macro_export]
 macro_rules! instantiate {
     ($folder:expr) => {
-        use gbench::Instantiator;
-        let __gbench_instantiator__ = Instantiator::new($folder);
+        let __gbench_instantiator__ = {
+            use gbench::Instantiator;
+            Instantiator::new($folder)
+        };
     };
 }
 
@@ -95,9 +99,11 @@ macro_rules! instantiate {
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => {
-        use gbench::_log as log;
-        let log_string = format!($($arg)*);
-        log(&log_string);
+        {
+            use gbench::_log as log;
+            let log_string = format!($($arg)*);
+            log(&log_string);
+        }
     };
 }
 
