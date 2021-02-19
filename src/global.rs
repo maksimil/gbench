@@ -1,10 +1,8 @@
 use std::fs::File;
 use std::io::Write;
-use std::mem;
+use std::mem::{self, MaybeUninit};
 use std::sync::{Mutex, MutexGuard};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
-
-use mem::MaybeUninit;
 
 // Global data
 static mut GLOBAL_DATA: MaybeUninit<GlobalData> = MaybeUninit::uninit();

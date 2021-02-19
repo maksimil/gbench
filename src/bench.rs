@@ -19,6 +19,25 @@ pub fn _log(log: &str) {
     .unwrap();
 }
 
+/// A function for saving benchmarking results
+///
+/// ```
+/// let start = Instant::now();
+/// thread::sleep(Duration::from_millis(500));
+/// bench("500ms", start);
+/// ```
+/// will write this to the benchmarking file
+/// ```
+/// {
+///   "cat": "function",
+///   "dur": /* duration of the event */,
+///   "name": "500ms",
+///   "ph": "X",
+///   "pid": 0,
+///   "tid": 0,
+///   "ts": /* timestamp of start */
+/// }
+/// ```
 pub fn bench(name: &str, start: Instant) {
     let ts = ts_of(start);
     let dur = start.elapsed().as_micros();
