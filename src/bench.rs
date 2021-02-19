@@ -48,6 +48,16 @@ pub fn bench(name: &str, start: Instant) {
     ).unwrap();
 }
 
+/// A sctruct used for benchmarking scopes that it is in.
+///
+/// TimeScope saves the Instant it was created. When dropped it
+/// calls [bench] on the instant and a name that was specified
+/// in the constructor.
+///
+/// Using [scope!] macro instead of this struct is recommened.
+///
+/// [bench]: fn.bench.html
+/// [scope!]: macro.scope.html
 pub struct TimeScope<S: AsRef<str>> {
     start: Instant,
     name: S,
