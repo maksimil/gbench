@@ -78,6 +78,14 @@ impl<S: AsRef<str>> Drop for TimeScope<S> {
     }
 }
 
+/// A sctruct used for instantiating global data.
+///
+/// This struct instantiates global data upon creation
+/// and deinstantiates it upon drop.
+///
+/// Using [instantiate!] macro instead of this struct is recommened.
+///
+/// [instantiate!]: macro.instantiate.html
 pub struct Instantiator;
 
 impl Instantiator {
