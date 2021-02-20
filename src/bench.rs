@@ -1,22 +1,16 @@
-use std::io::Write;
+use std::mem;
 use std::time::Instant;
 
-use crate::{begin, begin_time, end, file_mutex};
+use crate::global::{begin, begin_time, end, queue_mutex, BenchData};
 
 fn ts_of(instant: Instant) -> u128 {
     instant.duration_since(begin_time()).as_micros()
 }
 
-pub fn _log(log: &str) {
+pub fn _log(log: String) {
     let ts = ts_of(Instant::now());
 
-    let mut file = file_mutex();
-    write!(
-        file,
-        ",{{\"cat\":\"log\",\"name\":\"{}\",\"ph\":\"I\",\"pid\":0,\"tid\":0,\"ts\":{}}}",
-        log, ts
-    )
-    .unwrap();
+    queue_mutex().push(BenchData::Log { log, ts });
 }
 
 /// A function for saving benchmarking results
@@ -38,14 +32,11 @@ pub fn _log(log: &str) {
 ///   "ts": /* timestamp of start */
 /// }
 /// ```
-pub fn bench(name: &str, start: Instant) {
+pub fn bench(name: String, start: Instant) {
     let ts = ts_of(start);
     let dur = start.elapsed().as_micros();
 
-    let mut file = file_mutex();
-    write!(file,
-        ",{{\"cat\":\"function\",\"dur\":{},\"name\":\"{}\",\"ph\":\"X\",\"pid\":0,\"tid\":0,\"ts\":{}}}", dur, name, ts
-    ).unwrap();
+    queue_mutex().push(BenchData::Bench { name, ts, dur });
 }
 
 /// A sctruct used for benchmarking scopes that it is in.
@@ -58,13 +49,13 @@ pub fn bench(name: &str, start: Instant) {
 ///
 /// [bench]: fn.bench.html
 /// [scope!]: macro.scope.html
-pub struct TimeScope<S: AsRef<str>> {
+pub struct TimeScope {
     start: Instant,
-    name: S,
+    name: String,
 }
 
-impl<S: AsRef<str>> TimeScope<S> {
-    pub fn new(name: S) -> TimeScope<S> {
+impl TimeScope {
+    pub fn new(name: String) -> TimeScope {
         TimeScope {
             start: Instant::now(),
             name,
@@ -72,9 +63,9 @@ impl<S: AsRef<str>> TimeScope<S> {
     }
 }
 
-impl<S: AsRef<str>> Drop for TimeScope<S> {
+impl Drop for TimeScope {
     fn drop(&mut self) {
-        bench(self.name.as_ref(), self.start);
+        bench(mem::replace(&mut self.name, String::new()), self.start);
     }
 }
 
@@ -86,17 +77,17 @@ impl<S: AsRef<str>> Drop for TimeScope<S> {
 /// Using [instantiate!] macro instead of this struct is recommened.
 ///
 /// [instantiate!]: macro.instantiate.html
-pub struct Instantiator;
+pub struct Instantiator(&'static str);
 
 impl Instantiator {
-    pub fn new(folder: &str) -> Instantiator {
-        begin(folder);
-        Instantiator
+    pub fn new(folder: &'static str) -> Instantiator {
+        begin();
+        Instantiator(folder)
     }
 }
 
 impl Drop for Instantiator {
     fn drop(&mut self) {
-        end();
+        end(self.0);
     }
 }

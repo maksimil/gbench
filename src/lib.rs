@@ -4,11 +4,6 @@
 mod bench;
 mod global;
 
-pub(crate) use global::begin;
-pub(crate) use global::begin_time;
-pub(crate) use global::end;
-pub(crate) use global::file_mutex;
-
 pub use bench::bench;
 pub use bench::Instantiator;
 pub use bench::TimeScope;
@@ -102,7 +97,7 @@ macro_rules! log {
         {
             use gbench::_log as log;
             let log_string = format!($($arg)*);
-            log(&log_string);
+            log(log_string);
         }
     };
 }
