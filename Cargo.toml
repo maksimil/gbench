@@ -3,6 +3,12 @@ name = "gbench"
 version = "0.1.0"
 authors = ["Maxim Kosterov <maxim.kosterov@gmail.com>"]
 edition = "2018"
+license = "MIT"
+description = "This crate provides the tools to benchmark code for further analyzation using Chrome tracing"
+homepage = "https://github.com/maksimil/gbench"
+repository = "https://github.com/maksimil/gbench"
+documentation = "https://docs.rs/gbench"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

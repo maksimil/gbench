@@ -1,5 +1,5 @@
-//! This crate provides the tools to benchmark code and then analyzing the
-//! results using Chrome tracing.
+//! This crate provides the tools to benchmark code for
+//! further analyzation using Chrome tracing.
 
 mod bench;
 mod global;
