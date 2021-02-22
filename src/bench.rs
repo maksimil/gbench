@@ -59,12 +59,23 @@ impl Drop for TimeScope {
 /// Using [instantiate!] macro instead of this struct is recommened.
 ///
 /// [instantiate!]: macro.instantiate.html
-pub struct Instantiator(&'static str);
+pub struct Instantiator(&'static str, bool);
 
 impl Instantiator {
+    /// Constructs the instantiator.
     pub fn new(folder: &'static str) -> Instantiator {
         begin();
-        Instantiator(folder)
+        Instantiator(folder, true)
+    }
+
+    /// Deinstantiates global variables.
+    ///
+    /// This method is used when Instantiator is never dropped.
+    pub fn end(&mut self) {
+        if self.1 {
+            self.1 = false;
+            end(self.0);
+        }
     }
 }
 

@@ -56,14 +56,27 @@ macro_rules! scope {
 /// // expands into this
 /// let __gbench_instantiator__ = Instantiator::new("target/bench");
 /// ```
+///
+/// ```
+/// instantiate!(ginst | "target/bench");
+/// // expands into this
+/// let ginst = Instnatiator::new("target/bench");
+/// ```
+/// The second option is used when you need to use [end] on the instance.
+///
+/// [end]: struct.Instantiator.html#method.end
 #[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! instantiate {
-    ($folder:expr) => {
-        let __gbench_instantiator__ = {
+    ($name: ident | $folder:expr) => {
+        let mut $name = {
             use gbench::Instantiator;
             Instantiator::new($folder)
         };
+    };
+
+    ($folder:expr) => {
+        instantiate!(__global_instantiator__ | $folder);
     };
 }
 
