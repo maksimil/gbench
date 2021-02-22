@@ -16,13 +16,13 @@ pub use bench::_log;
 /// ```
 /// scope!(main)
 /// // expands into this
-/// let main = TimeScope::new("main");
+/// let main = TimeScope::new(format!("main"));
 /// ```
 ///
 /// ```
 /// scope!(main | "A {}", 0)
 /// // expands into this
-/// let main = TimeScope::new("A 0");
+/// let main = TimeScope::new(format!("A {}", 0));
 /// ```
 #[cfg(debug_assertions)]
 #[macro_export]

@@ -10,6 +10,4 @@ repository = "https://github.com/maksimil/gbench"
 documentation = "https://docs.rs/gbench"
 readme = "README.md"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
