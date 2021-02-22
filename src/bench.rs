@@ -1,7 +1,7 @@
 use std::mem;
 use std::time::Instant;
 
-use crate::global::{begin, begin_time, end, queue_mutex, BenchData};
+use crate::global::{begin, begin_time, end, gen_id, get_id, queue_mutex, BenchData};
 
 fn ts_of(instant: Instant) -> u128 {
     instant.duration_since(begin_time()).as_micros()
@@ -9,45 +9,26 @@ fn ts_of(instant: Instant) -> u128 {
 
 pub fn _log(log: String) {
     let ts = ts_of(Instant::now());
+    let tid = get_id();
 
-    queue_mutex().push(BenchData::Log { log, ts });
+    queue_mutex().push(BenchData::Log { log, ts, tid });
 }
 
-/// A function for saving benchmarking results
-///
-/// ```
-/// let start = Instant::now();
-/// thread::sleep(Duration::from_millis(500));
-/// bench("500ms", start);
-/// ```
-/// will write this to the benchmarking file
-/// ```
-/// {
-///   "cat": "function",
-///   "dur": /* duration of the event */,
-///   "name": "500ms",
-///   "ph": "X",
-///   "pid": 0,
-///   "tid": 0,
-///   "ts": /* timestamp of start */
-/// }
-/// ```
-pub fn bench(name: String, start: Instant) {
+fn bench(name: String, start: Instant) {
     let ts = ts_of(start);
     let dur = start.elapsed().as_micros();
+    let tid = get_id();
 
-    queue_mutex().push(BenchData::Bench { name, ts, dur });
+    queue_mutex().push(BenchData::Bench { name, ts, dur, tid });
 }
 
 /// A sctruct used for benchmarking scopes that it is in.
 ///
 /// TimeScope saves the Instant it was created. When dropped it
-/// calls [bench] on the instant and a name that was specified
-/// in the constructor.
+/// saves the benchmarking results to the file.
 ///
 /// Using [scope!] macro instead of this struct is recommened.
 ///
-/// [bench]: fn.bench.html
 /// [scope!]: macro.scope.html
 pub struct TimeScope {
     start: Instant,
@@ -56,6 +37,7 @@ pub struct TimeScope {
 
 impl TimeScope {
     pub fn new(name: String) -> TimeScope {
+        gen_id();
         TimeScope {
             start: Instant::now(),
             name,

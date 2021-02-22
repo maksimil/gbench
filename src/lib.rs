@@ -3,8 +3,8 @@
 
 mod bench;
 mod global;
+mod id;
 
-pub use bench::bench;
 pub use bench::Instantiator;
 pub use bench::TimeScope;
 
