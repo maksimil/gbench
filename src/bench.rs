@@ -1,5 +1,5 @@
+use std::mem;
 use std::time::Instant;
-use std::{mem, u128};
 
 use crate::global::{begin, begin_time, end, gen_id, get_id, queue_mutex, BenchData};
 
