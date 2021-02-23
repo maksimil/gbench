@@ -1,25 +1,29 @@
-use std::mem;
 use std::time::Instant;
+use std::{mem, u128};
 
 use crate::global::{begin, begin_time, end, gen_id, get_id, queue_mutex, BenchData};
 
-fn ts_of(instant: Instant) -> u128 {
-    instant.duration_since(begin_time()).as_micros()
+fn ts_of(instant: Instant) -> f32 {
+    (instant.duration_since(begin_time()).as_nanos() as f32) / 1000.0
+}
+
+fn enqueue(data: BenchData) {
+    let mut lock = queue_mutex();
+    lock.push(data);
 }
 
 pub fn _log(log: String) {
     let ts = ts_of(Instant::now());
     let tid = get_id();
 
-    queue_mutex().push(BenchData::Log { log, ts, tid });
+    enqueue(BenchData::Log { log, ts, tid });
 }
 
-fn bench(name: String, start: Instant) {
-    let ts = ts_of(start);
-    let dur = start.elapsed().as_micros();
+fn bench(name: String, ts: f32) {
+    let dur = ts_of(Instant::now()) - ts;
     let tid = get_id();
 
-    queue_mutex().push(BenchData::Bench { name, ts, dur, tid });
+    enqueue(BenchData::Bench { name, ts, dur, tid });
 }
 
 /// A sctruct used for benchmarking scopes that it is in.
@@ -31,7 +35,7 @@ fn bench(name: String, start: Instant) {
 ///
 /// [scope!]: macro.scope.html
 pub struct TimeScope {
-    start: Instant,
+    start: f32,
     name: String,
 }
 
@@ -39,7 +43,7 @@ impl TimeScope {
     pub fn new(name: String) -> TimeScope {
         gen_id();
         TimeScope {
-            start: Instant::now(),
+            start: ts_of(Instant::now()),
             name,
         }
     }

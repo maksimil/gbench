@@ -10,13 +10,13 @@ use crate::id::{IdBorrow, IdStorage};
 pub enum BenchData {
     Log {
         log: String,
-        ts: u128,
+        ts: f32,
         tid: usize,
     },
     Bench {
         name: String,
-        ts: u128,
-        dur: u128,
+        ts: f32,
+        dur: f32,
         tid: usize,
     },
 }
