@@ -10,4 +10,9 @@ repository = "https://github.com/maksimil/gbench"
 documentation = "https://docs.rs/gbench"
 readme = "README.md"
 
+include = [
+    "src/**/*.rs", 
+    "Cargo.toml"
+]
+
 [dependencies]
