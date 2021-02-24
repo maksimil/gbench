@@ -48,7 +48,6 @@
 //! ```
 //!
 //! - Example of a [count!] macro use
-//!
 //! ```rust
 //! use gbench::{count, instantiate, scope};
 //!
@@ -153,6 +152,10 @@ pub use bench::_count;
 
 /// A macro for benchmarking a scope of code
 ///
+/// # Implementation
+///
+/// The macro expands into a [TimeScope] declaration
+///
 /// ```rust
 /// scope!(main)
 /// // expands into this
@@ -163,6 +166,33 @@ pub use bench::_count;
 /// scope!(main | "A {}", 0)
 /// // expands into this
 /// let main = TimeScope::new(format!("A {}", 0));
+/// ```
+///
+/// [TimeScope]: struct.TimeScope.html
+///
+/// # Examples
+///
+/// ```rust
+/// // You can organize your subtasks in scopes to
+/// // benchmark them
+/// scope!(imp | "An important task");
+///
+/// {
+///     scope!(i1 | "Important subtask");
+///     do_work();
+/// }
+///
+/// {
+///     scope!(i2 | "Less important subtask");
+///     do_other_work();
+/// }
+///
+/// // If the block of code that you need to benchmark
+/// // has ended you can drop the guard if the scope
+/// // has not ended
+/// drop(imp);
+///
+/// // rest of the scope...
 /// ```
 #[cfg(debug_assertions)]
 #[macro_export]
