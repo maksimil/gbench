@@ -38,7 +38,7 @@ pub fn _count(name: String, data: Vec<(String, f32)>) {
     });
 }
 
-/// A sctruct used for benchmarking scopes that it is in.
+/// Starts a benchmarking scope on creation and ends it on drop
 ///
 /// TimeScope saves the Instant it was created. When dropped it
 /// saves the benchmarking results to the file.
@@ -67,7 +67,7 @@ impl Drop for TimeScope {
     }
 }
 
-/// A sctruct used for instantiating global data.
+/// Instantiates global data on creation and deinstantiates it on drop
 ///
 /// This struct instantiates global data upon creation
 /// and deinstantiates it upon drop.
@@ -78,15 +78,15 @@ impl Drop for TimeScope {
 pub struct Instantiator(&'static str, bool);
 
 impl Instantiator {
-    /// Constructs the instantiator.
+    /// Constructs the instantiator
     pub fn new(folder: &'static str) -> Instantiator {
         begin();
         Instantiator(folder, true)
     }
 
-    /// Deinstantiates global variables.
+    /// Deinstantiates global variables
     ///
-    /// This method is used when Instantiator is never dropped.
+    /// This method is used when Instantiator is never dropped
     pub fn end(&mut self) {
         if self.1 {
             self.1 = false;

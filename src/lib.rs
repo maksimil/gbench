@@ -3,7 +3,7 @@
 //!
 //! # Examples
 //!
-//! - Examples of using gbench basic functionality
+//! Examples of using gbench basic functionality
 //! ```rust
 //! use gbench::{instantiate, scope};
 //!
@@ -27,7 +27,7 @@
 //! }
 //! ```
 //!
-//! - Example of a [log!] macro use
+//! Example of a [log!] macro use
 //! ```rust
 //! use gbench::{instantiate, log, scope};
 //!
@@ -47,7 +47,7 @@
 //! }
 //! ```
 //!
-//! - Example of a [count!] macro use
+//! Example of a [count!] macro use
 //! ```rust
 //! use gbench::{count, instantiate, scope};
 //!
@@ -74,7 +74,7 @@
 //! }
 //! ```
 //!
-//! - Full example
+//! Full example
 //! ```rust
 //! use std::thread;
 //!
@@ -150,7 +150,7 @@ pub use bench::_log;
 #[doc(hidden)]
 pub use bench::_count;
 
-/// A macro for benchmarking a scope of code
+/// Benchmarks a scope of code
 ///
 /// # Implementation
 ///
@@ -217,7 +217,7 @@ macro_rules! scope {
     ($name:ident|$($arg:tt)*) => {};
 }
 
-/// A macro for instantiating the global environment for benchmark logging.
+/// Instantiates the global variables for benchmark logging
 ///
 /// This macro should be used at the top of any program using this crate.
 ///
@@ -256,7 +256,7 @@ macro_rules! instantiate {
     ($folder: expr) => {};
 }
 
-/// A macro for logging an event.
+/// Logs data to a benchmarking file
 ///
 /// ```rust
 /// let a = 0;
@@ -291,7 +291,7 @@ macro_rules! log {
     ($($arg:tt)*) => {};
 }
 
-/// A macro for making counting events.
+/// Creates a counting event
 ///
 /// The following code will log value "i" to a field "val"
 /// in counter "CA"
