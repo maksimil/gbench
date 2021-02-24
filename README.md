@@ -2,6 +2,11 @@
 
 This crate provides the tools to benchmark code for further analyzation using Chrome tracing. The crate is purely rust and has no dependencies.
 
+# Advantages
+
+- The crate is based on macros which are empty if debug_assert is off
+- Writing benchmarking data will have almost no effect on the time (1mcs per trace on my machine)
+
 # Example
 
 For more examples and a guide on how to use please visit the [documentation](https://docs.rs/gbench)
