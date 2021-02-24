@@ -19,6 +19,12 @@ pub enum BenchData {
         dur: f32,
         tid: usize,
     },
+    Count {
+        name: String,
+        ts: f32,
+        tid: usize,
+        data: Vec<(String, f32)>,
+    },
 }
 
 static mut GLOBAL_DATA: MaybeUninit<GlobalData> = MaybeUninit::uninit();
@@ -67,9 +73,41 @@ fn write_data(file: &mut File, data: BenchData) {
             log, tid, ts
         )
         .unwrap(),
-        BenchData::Bench { name, ts, dur, tid } => write!(file,
-            "{{\"cat\":\"function\",\"dur\":{},\"name\":\"{}\",\"ph\":\"X\",\"pid\":0,\"tid\":{},\"ts\":{}}}", dur, name, tid,  ts
+        BenchData::Bench { name, ts, dur, tid } => write!(
+            file,
+            "{{\"cat\":\"function\",\"dur\":{},\"name\":\"{}\",\"ph\":\"X\",\"pid\":0,\"tid\":{},\"ts\":{}}}", 
+            dur, name, tid,  ts
         ).unwrap(),
+        BenchData::Count {name, ts, tid, data} => {
+            write!(
+                file, 
+                "{{\"cat\":\"count\",\"name\":\"{}\",\"ph\":\"C\",\"pid\":0,\"tid\":{},\"ts\":{}, \"args\":{{", 
+                name, tid, ts
+            ).unwrap();
+
+            let mut dataiter = data.into_iter();
+
+            if let Some((name, value)) = dataiter.next() {
+                write!(
+                    file,
+                    "\"{}\":{}",
+                    name, value
+                ).unwrap();
+            }
+
+            for (name, value) in dataiter {
+                write!(
+                    file, 
+                    ",\"{}\":{}",
+                    name, value
+                ).unwrap();
+            }
+
+            write!(
+                file, 
+                "}}}}"
+            ).unwrap();
+        }
     }
 }
 

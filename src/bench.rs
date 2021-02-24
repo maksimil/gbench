@@ -26,6 +26,18 @@ fn bench(name: String, ts: f32) {
     enqueue(BenchData::Bench { name, ts, dur, tid });
 }
 
+pub fn _count(name: String, data: Vec<(String, f32)>) {
+    let ts = ts_of(Instant::now());
+    let tid = get_id();
+
+    enqueue(BenchData::Count {
+        name,
+        data,
+        ts,
+        tid,
+    });
+}
+
 /// A sctruct used for benchmarking scopes that it is in.
 ///
 /// TimeScope saves the Instant it was created. When dropped it

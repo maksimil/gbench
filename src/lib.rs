@@ -47,6 +47,34 @@
 //! }
 //! ```
 //!
+//! - Example of a [count!] macro use
+//!
+//! ```rust
+//! use gbench::{count, instantiate, scope};
+//!
+//! fn main() {
+//!     instantiate!(ginst | "target/bench");
+//!     {
+//!         scope!(sc | "Scope");
+//!
+//!         for i in 0..1000 {
+//!             let val = i * i;
+//!
+//!             // This statement writes val to field "val" of counter "Actual value"
+//!             // and writes i to field "i" of counter "I"
+//!             count! {
+//!                 "Actual value" => {
+//!                     "val" => val
+//!                 },
+//!                 "I" => {
+//!                     "i" => i
+//!                 }
+//!             }
+//!         }
+//!     }
+//! }
+//! ```
+//!
 //! - Full example
 //! ```rust
 //! use std::thread;
@@ -108,6 +136,7 @@
 //! ```
 //!
 //! [log!]: macro.log.html
+//! [count!]: macro.count.html
 
 mod bench;
 mod global;
@@ -119,15 +148,18 @@ pub use bench::TimeScope;
 #[doc(hidden)]
 pub use bench::_log;
 
+#[doc(hidden)]
+pub use bench::_count;
+
 /// A macro for benchmarking a scope of code
 ///
-/// ```
+/// ```rust
 /// scope!(main)
 /// // expands into this
 /// let main = TimeScope::new(format!("main"));
 /// ```
 ///
-/// ```
+/// ```rust
 /// scope!(main | "A {}", 0)
 /// // expands into this
 /// let main = TimeScope::new(format!("A {}", 0));
@@ -159,13 +191,13 @@ macro_rules! scope {
 ///
 /// This macro should be used at the top of any program using this crate.
 ///
-/// ```
+/// ```rust
 /// instantiate!("target/bench");
 /// // expands into this
 /// let __gbench_instantiator__ = Instantiator::new("target/bench");
 /// ```
 ///
-/// ```
+/// ```rust
 /// instantiate!(ginst | "target/bench");
 /// // expands into this
 /// let ginst = Instnatiator::new("target/bench");
@@ -196,7 +228,7 @@ macro_rules! instantiate {
 
 /// A macro for logging an event.
 ///
-/// ```
+/// ```rust
 /// let a = 0;
 /// log!("A: {}", a);
 /// ```
@@ -227,4 +259,55 @@ macro_rules! log {
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => {};
+}
+
+/// A macro for making counting events.
+///
+/// The following code will log value "i" to a field "val"
+/// in counter "CA"
+/// ```rust
+/// count!("CA" => {"val" => i});
+/// ```
+///
+/// This code will write i to field "a" and i/2 to field "b" in
+/// counter "a" and i%3 in field "c" in counter "b".
+/// ```rust
+/// count!(
+///     "a" => {
+///         "a" => i,
+///         "b" => i / 2
+///     },
+///     "b" => {
+///         "c" => i % 3
+///     }
+/// );
+/// ```
+/// For additional information on counter events visit
+/// [official chrome tracing documentation]
+///
+/// [official chrome tracing documentation]:https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.msg3086636uq
+#[cfg(debug_assertions)]
+#[macro_export]
+macro_rules! count {
+    ($($name: expr => {$($argname: expr => $val:expr),*}),*) => {{
+        use gbench::_count as count;
+
+        $(
+            let cname = String::from($name);
+
+            let mut data = Vec::new();
+
+            $(
+                data.push((String::from($name), $val as f32));
+            )*
+
+            count(cname, data);
+        )*
+    }};
+}
+
+#[cfg(not(debug_assertions))]
+#[macro_export]
+macro_rules! count {
+    ($name: ident => {$($argname: ident => $val: expr),*}) => {};
 }
