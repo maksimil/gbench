@@ -1,6 +1,6 @@
 [package]
 name = "gbench"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Maxim Kosterov <maxim.kosterov@gmail.com>"]
 edition = "2018"
 license = "MIT"
