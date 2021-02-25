@@ -221,20 +221,62 @@ macro_rules! scope {
 ///
 /// This macro should be used at the top of any program using this crate.
 ///
+/// # Implementation
+///
+/// This macro expands into a declaration of [Instantiator] which instantiates
+/// global variables on creation and deinstantiates them on drop.
+///
 /// ```rust
 /// instantiate!("target/bench");
 /// // expands into this
 /// let __gbench_instantiator__ = Instantiator::new("target/bench");
 /// ```
 ///
+/// If you need to deinstantiate global variables before variable goes out
+/// of scope you can specify the variable name and then call [end] on it
+/// when you need the deinstantiation.
+///
 /// ```rust
 /// instantiate!(ginst | "target/bench");
 /// // expands into this
 /// let ginst = Instnatiator::new("target/bench");
 /// ```
-/// The second option is used when you need to use [end] on the instance.
 ///
+/// [Instantiator]: struct.Instantiator.html
 /// [end]: struct.Instantiator.html#method.end
+///
+/// # Examples
+/// ```rust
+/// use gbench::{instantiate, scope};
+///
+/// fn main() {
+///     instantiate!("target/bench");
+///     {
+///         scope!(sc | "Scope");
+///
+///         for _ in 0..1_000_000 {
+///             let _a = 1 + 1;
+///         }
+///     }
+/// }
+/// ```
+/// or using [end]
+/// ```rust
+/// use gbench::{instantiate, scope};
+///
+/// fn main() {
+///     instantiate!(ginst | "target/bench");
+///     {
+///         scope!(sc | "Scope");
+///
+///         for _ in 0..1_000_000 {
+///             let _a = 1 + 1;
+///         }
+///     }
+///
+///     ginst.end();
+/// }
+/// ```
 #[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! instantiate {
