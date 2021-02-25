@@ -2,6 +2,7 @@ use std::mem;
 use std::time::Instant;
 
 use crate::global::{begin, begin_time, end, gen_id, get_id, queue_mutex, BenchData};
+use crate::writer::Writer;
 
 fn ts_of(instant: Instant) -> f32 {
     (instant.duration_since(begin_time()).as_nanos() as f32) / 1000.0
@@ -75,28 +76,34 @@ impl Drop for TimeScope {
 /// Using [instantiate!] macro instead of this struct is recommened.
 ///
 /// [instantiate!]: macro.instantiate.html
-pub struct Instantiator(&'static str, bool);
+pub struct Instantiator {
+    alive: bool,
+    writers: Vec<Box<dyn Writer + 'static>>,
+}
 
 impl Instantiator {
     /// Constructs the instantiator
-    pub fn new(folder: &'static str) -> Instantiator {
+    pub fn new(writers: Vec<Box<dyn Writer + 'static>>) -> Instantiator {
         begin();
-        Instantiator(folder, true)
+        Instantiator {
+            alive: true,
+            writers,
+        }
     }
 
     /// Deinstantiates global variables
     ///
     /// This method is used when Instantiator is never dropped
     pub fn end(&mut self) {
-        if self.1 {
-            self.1 = false;
-            end(self.0);
+        if self.alive {
+            self.alive = false;
+            end(mem::replace(&mut self.writers, Vec::new()));
         }
     }
 }
 
 impl Drop for Instantiator {
     fn drop(&mut self) {
-        end(self.0);
+        self.end();
     }
 }

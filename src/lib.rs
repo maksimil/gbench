@@ -140,9 +140,14 @@
 mod bench;
 mod global;
 mod id;
+mod writer;
 
 pub use bench::Instantiator;
 pub use bench::TimeScope;
+
+pub use global::BenchData;
+pub use writer::ChromeTracing;
+pub use writer::Writer;
 
 #[doc(hidden)]
 pub use bench::_log;
@@ -280,15 +285,22 @@ macro_rules! scope {
 #[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! instantiate {
-    ($name: ident | $folder:expr) => {
+    ($name: ident | $($writer: expr),*) => {
         let mut $name = {
             use gbench::Instantiator;
-            Instantiator::new($folder)
+
+            let mut writers = Vec::new();
+
+            $(
+                writers.push(Box::new($writer) as Box<dyn gbench::Writer + 'static>);
+            )*
+
+            Instantiator::new(writers)
         };
     };
 
-    ($folder:expr) => {
-        instantiate!(__global_instantiator__ | $folder);
+    ($($writer: expr),*) => {
+        instantiate!(__global_instantiator__ | $($writer),*);
     };
 }
 
