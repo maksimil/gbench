@@ -147,6 +147,7 @@ pub use bench::TimeScope;
 
 pub use global::BenchData;
 pub use writer::ChromeTracing;
+pub use writer::CsvWriter;
 pub use writer::Writer;
 
 #[doc(hidden)]
@@ -382,7 +383,7 @@ macro_rules! count {
             let mut data = Vec::new();
 
             $(
-                data.push((String::from($name), $val as f32));
+                data.push((String::from($argname), $val as f32));
             )*
 
             count(cname, data);
