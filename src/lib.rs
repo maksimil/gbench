@@ -233,9 +233,9 @@ macro_rules! scope {
 /// global variables on creation and deinstantiates them on drop.
 ///
 /// ```rust
-/// instantiate!("target/bench");
+/// instantiate!(ChromeTracing("target/bench"));
 /// // expands into this
-/// let __gbench_instantiator__ = Instantiator::new("target/bench");
+/// let __gbench_instantiator__ = Instantiator::new(vec![Box::new(ChromeTracing("target/bench"))]);
 /// ```
 ///
 /// If you need to deinstantiate global variables before variable goes out
@@ -243,9 +243,9 @@ macro_rules! scope {
 /// when you need the deinstantiation.
 ///
 /// ```rust
-/// instantiate!(ginst | "target/bench");
+/// instantiate!(ginst | ChromeTracing("target/bench"));
 /// // expands into this
-/// let ginst = Instnatiator::new("target/bench");
+/// let ginst = Instantiator::new(vec![Box::new(ChromeTracing("target/bench"))]);
 /// ```
 ///
 /// [Instantiator]: struct.Instantiator.html
@@ -253,10 +253,10 @@ macro_rules! scope {
 ///
 /// # Examples
 /// ```rust
-/// use gbench::{instantiate, scope};
+/// use gbench::{instantiate, scope, ChromeTracing};
 ///
 /// fn main() {
-///     instantiate!("target/bench");
+///     instantiate!(ChromeTracing("target/bench"));
 ///     {
 ///         scope!(sc | "Scope");
 ///
@@ -268,10 +268,10 @@ macro_rules! scope {
 /// ```
 /// or using [end]
 /// ```rust
-/// use gbench::{instantiate, scope};
+/// use gbench::{instantiate, scope, ChromeTracing};
 ///
 /// fn main() {
-///     instantiate!(ginst | "target/bench");
+///     instantiate!(ginst | ChromeTracing("target/bench"));
 ///     {
 ///         scope!(sc | "Scope");
 ///
@@ -279,7 +279,6 @@ macro_rules! scope {
 ///             let _a = 1 + 1;
 ///         }
 ///     }
-///
 ///     ginst.end();
 /// }
 /// ```
@@ -317,17 +316,16 @@ macro_rules! instantiate {
 /// let a = 0;
 /// log!("A: {}", a);
 /// ```
-/// will write this to the benchmarking file
+/// will queue this [BenchData]
 /// ```
-/// {
-///   "cat": "log",
-///   "name": "A: 0",
-///   "ph": "I",
-///   "pid": 0,
-///   "tid": 0,
-///   "ts": /* current timestamp */
+/// Log {
+///     log: "A: 0",
+///     ts: /* event's timestamp */,
+///     tid: /* event's thread of execution */,
 /// }
 /// ```
+///
+/// [BenchData]: enum.BenchData.html
 #[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! log {
@@ -348,15 +346,8 @@ macro_rules! log {
 
 /// Creates a counting event
 ///
-/// The following code will log value "i" to a field "val"
-/// in counter "CA"
 /// ```rust
-/// count!("CA" => {"val" => i});
-/// ```
-///
-/// This code will write i to field "a" and i/2 to field "b" in
-/// counter "a" and i%3 in field "c" in counter "b".
-/// ```rust
+/// let i = 10;
 /// count!(
 ///     "a" => {
 ///         "a" => i,
@@ -367,10 +358,39 @@ macro_rules! log {
 ///     }
 /// );
 /// ```
-/// For additional information on counter events visit
-/// [official chrome tracing documentation]
 ///
-/// [official chrome tracing documentation]:https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.msg3086636uq
+/// Will queue these [BenchData]
+///
+/// ```
+/// Count {
+///     name: "a",
+///     ts: /* event's timestamp */,
+///     tid: /* event's thread of execution */,
+///     data: [
+///         (
+///             "a",
+///             10.0,
+///         ),
+///         (
+///             "b",
+///             5.0,
+///         ),
+///     ],
+/// },
+/// Count {
+///     name: "b",
+///     ts: /* event's timestamp */,
+///     tid: /* event's thread of execution */,
+///     data: [
+///         (
+///             "c",
+///             1.0,
+///         ),
+///     ],
+/// },
+/// ```
+///
+/// [BenchData]: enum.BenchData.html
 #[cfg(debug_assertions)]
 #[macro_export]
 macro_rules! count {
