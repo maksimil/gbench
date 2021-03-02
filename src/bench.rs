@@ -71,7 +71,8 @@ impl Drop for TimeScope {
 /// Instantiates global data on creation and deinstantiates it on drop
 ///
 /// This struct instantiates global data upon creation
-/// and deinstantiates it upon drop.
+/// and deinstantiates it upon drop. It also is responsible
+/// for calling the writers when the data is collected.
 ///
 /// Using [instantiate!] macro instead of this struct is recommened.
 ///
@@ -83,6 +84,10 @@ pub struct Instantiator {
 
 impl Instantiator {
     /// Constructs the instantiator
+    ///
+    /// The writers will be called in [end] method.
+    ///
+    /// [end]: struct.Instantiator.html#method.end
     pub fn new(writers: Vec<Box<dyn Writer + 'static>>) -> Instantiator {
         begin();
         Instantiator {
@@ -91,9 +96,10 @@ impl Instantiator {
         }
     }
 
-    /// Deinstantiates global variables
+    /// Deinstantiates global variables and calls the writers
     ///
-    /// This method is used when Instantiator is never dropped
+    /// This method is used when Instantiator is never dropped.
+    // This method is called on drop.
     pub fn end(&mut self) {
         if self.alive {
             self.alive = false;
