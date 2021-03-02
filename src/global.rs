@@ -6,19 +6,29 @@ use crate::id::{IdBorrow, IdStorage};
 use crate::writer::Writer;
 
 // Global data
+
+/// Enum that represents different benchmarking data
+///
+/// Data that is passed to the writers is in form of these enums.
+///
+/// # Fields
+/// - **ts** -  timestamp
+/// - **dur** - duration
+/// - **tid** - thread id
 #[derive(Debug, Clone)]
 pub enum BenchData {
-    Log {
-        log: String,
-        ts: f32,
-        tid: usize,
-    },
+    /// Log contains logging data produced by the [log!](macro.log.html) macro
+    Log { log: String, ts: f32, tid: usize },
+
+    /// Bench contains benchmarking data produced by the [scope!](macro.scope.html) macro
     Bench {
         name: String,
         ts: f32,
         dur: f32,
         tid: usize,
     },
+
+    /// Count contains counting data produced by the [count!](macro.count.html) macro
     Count {
         name: String,
         ts: f32,
