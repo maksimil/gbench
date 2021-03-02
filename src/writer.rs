@@ -5,10 +5,33 @@ use std::io::Write;
 
 use crate::global::BenchData;
 
+/// The trait that is implemented by all the writers
+///
+/// # Examples
+///
+/// QueueLogger will log out to console all the collected data
+/// when program ends.
+/// ```rust
+/// struct QueueLogger;
+/// 
+/// impl Writer for QueueLogger {
+///     fn end(&self, data: &Vec<BenchData>) {
+///         for data in data.iter() {
+///             println!("{:#?}", data);
+///         }
+///     }
+/// }
+/// ```
 pub trait Writer {
+    /// This method is called on all the collected data when
+    /// program ends
     fn end(&self, data: &Vec<BenchData>);
 }
 
+/// Writer for google chrome tracing
+///
+/// First field is the name of the folder where the 
+/// output files will be saved.
 pub struct ChromeTracing(pub &'static str);
 
 fn write_data(file: &mut File, data: &BenchData) {
@@ -90,6 +113,13 @@ impl Writer for ChromeTracing {
     }
 }
 
+/// Writer for csv format
+///
+/// This writer will save the counter data in form 
+/// of a csv table.
+///
+/// First field is the name of the folder where the 
+/// output files will be saved.
 pub struct CsvWriter(pub &'static str);
 
 const DELIMITER: char = ';';
