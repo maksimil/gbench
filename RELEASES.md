@@ -1,3 +1,8 @@
+# Release 1.0.0
+
+- Move to a writer system
+- Added ChromeTracing and CsvWriter
+
 # Release 0.3.1
 
 - Doc updates
