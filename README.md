@@ -4,17 +4,18 @@ This crate provides the tools to benchmark code for further analyzation using Ch
 
 # Advantages
 
-- The crate is based on macros which are empty if debug_assert is off
+- The crate is based on macros which are empty if debug_assertions is off
 - Writing benchmarking data will have almost no effect on the time (1mcs per trace on my machine)
+- Simple macro-based syntax
+- You have control over how the collected data will be saved
 
 # Example
 
 For more examples and a guide on how to use please visit the [documentation](https://docs.rs/gbench)
 
 ```rust
+use gbench::{instantiate, scope, ChromeTracing};
 use std::thread;
-
-use gbench::{instantiate, scope};
 
 fn calculate(num: f32, n: u32) -> f32 {
     (0..n)
@@ -23,18 +24,12 @@ fn calculate(num: f32, n: u32) -> f32 {
 }
 
 fn main() {
-    // Istantiation of the global variables
-    // It is needed at the top of every program that uses gbench
-    // The folder that is specified is the folder where the data
-    // will be saved
-    instantiate!("target/bench");
+    instantiate!(ChromeTracing("target/bench"));
 
-    // Starting the main scope of the whole program
     scope!(program_scope | "Program scope");
 
     // Doing the work that needs benchmarking
     for _ in 0..5 {
-        // Marking the start of the subprogram scope
         scope!(main | "Main scope");
 
         // Spawning a thread to do work
@@ -66,7 +61,6 @@ fn main() {
 
         // Marking the start of another task
         scope!(join | "Joining thread");
-
         thread.join().unwrap();
 
         // This line of code is unnecessary but I like
@@ -83,5 +77,4 @@ The code above produces this trace
 # Links
 
 - [crates.io](https://crates.io/crates/gbench)
-- [chrome tracing docs](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview)
 - [crate documentation](https://docs.rs/gbench)
