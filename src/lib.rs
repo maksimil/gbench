@@ -284,10 +284,10 @@ macro_rules! instantiate {
         let mut $name = {
             use gbench::Instantiator;
 
-            let mut writers = Vec::new();
+            let mut writers = std::vec::Vec::new();
 
             $(
-                writers.push(Box::new($writer) as Box<dyn gbench::Writer + 'static>);
+                writers.push(std::boxed::Box::new($writer) as std::boxed::Box<dyn gbench::Writer + 'static>);
             )*
 
             Instantiator::new(writers)
@@ -393,12 +393,12 @@ macro_rules! count {
         use gbench::_count as count;
 
         $(
-            let cname = String::from($name);
+            let cname = std::string::String::from($name);
 
-            let mut data = Vec::new();
+            let mut data = std::vec::Vec::new();
 
             $(
-                data.push((String::from($argname), $val as f32));
+                data.push((std::string::String::from($argname), $val as f32));
             )*
 
             count(cname, data);
